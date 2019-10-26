@@ -1,0 +1,33 @@
+{
+  "name": "Ajoystick",
+  "description": "Simple Android joystick base on adb.",
+  "type": "library",
+  "keywords": [
+    "Android",
+    "adb",
+    "genyshell",
+    "testing"
+  ],
+  "homepage": "https://github.com/ladit/Ajoystick",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Ladit",
+      "email": "i@ladit.me",
+      "homepage": "https://ladit.me"
+    }
+  ],
+  "require": {
+    "ext-dom": "*",
+    "ext-gd": "*"
+  },
+  "config": {
+    "optimize-autoloader": true,
+    "sort-packages": true
+  },
+  "autoload": {
+    "psr-4": {
+      "Ajoystick\\": ["src"]
+    }
+  }
+}
