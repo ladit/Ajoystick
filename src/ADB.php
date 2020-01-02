@@ -1,8 +1,6 @@
 <?php
 
-
 namespace Ajoystick;
-
 
 use DOMDocument;
 use DOMXPath;
@@ -121,7 +119,9 @@ class ADB
         // system specific commands
         self::$grepCommand = self::$hostOS === 'windows' ? 'findstr' : 'grep';
 
-        if (trim($this->shell('settings get secure default_input_method')) === 'com.android.adbkeyboard/.AdbIME') self::$adbKeyboardIsDefaultIME = true;
+        if (trim($this->shell('settings get secure default_input_method')) === 'com.android.adbkeyboard/.AdbIME') {
+            self::$adbKeyboardIsDefaultIME = true;
+        }
     }
 
     /**
@@ -199,7 +199,9 @@ class ADB
         $command = self::getAdbExecutive() . ' ' . $this->adbDeviceParam . ' ' . $args;
         Log::debug("ADB:adb: $command");
         $handle = popen($command, 'rb');
-        if ($noBlocking === false) stream_set_blocking($handle, 1);
+        if ($noBlocking === false) {
+            stream_set_blocking($handle, 1);
+        }
         $output = stream_get_contents($handle);
         pclose($handle);
         return $output;
@@ -227,10 +229,13 @@ class ADB
         $devices = [];
         for ($i = 0; $i < count($result); $i++) {
             preg_match('/^(.+)?\s+(offline|bootloader|device)$/', $result[$i], $match);
-            if (!empty($match)) $devices[] = [
-                'id' => $match[1],
-                'state' => $match[2]
-            ];
+            if (!empty($match)) {
+                $devices[] = [
+                    'id' => $match[1],
+                    'state' => $match[2],
+                ];
+            }
+
         }
         return $devices;
     }
@@ -357,10 +362,10 @@ class ADB
      */
     public function getCurrentPackageAndActivity(): string
     {
-        $result = $this->shell('dumpsys activity | ' . self::$grepCommand . ' -i "Run #"');
-        preg_match_all('/\s+Run #\d+: ActivityRecord\{[a-zA-Z0-9]+ u0 (.+?\/.+?) t\d+\}\r?\n/', $result, $matches);
+        $result = trim($this->shell('dumpsys window windows | ' . self::$grepCommand . ' mCurrentFocus'));
+        preg_match_all('/mCurrentFocus=Window\{[a-zA-Z0-9]+ u0 (.+?\/.+?)\}/', $result, $matches);
         if (!isset($matches[1][0])) {
-            Log::error("ADB::getFocusedPackageAndActivity: no matches.");
+            Log::warning("ADB::getFocusedPackageAndActivity: no match for $result");
             return '';
         }
         return $matches[1][0];
@@ -375,8 +380,12 @@ class ADB
     {
         $currentPackageAndActivity = $this->getCurrentPackageAndActivity();
         $result = explode('/', $currentPackageAndActivity);
-        if (isset($result[0])) return $result[0];
-        else Log::warning("ADB::getCurrentPackage: explode error, currentPackageAndActivity: $currentPackageAndActivity");
+        if (isset($result[0])) {
+            return $result[0];
+        } else {
+            Log::error("ADB::getCurrentPackage: explode error, currentPackageAndActivity: $currentPackageAndActivity");
+        }
+
         return '';
     }
 
@@ -389,8 +398,12 @@ class ADB
     {
         $currentPackageAndActivity = $this->getCurrentPackageAndActivity();
         $result = explode('/', $currentPackageAndActivity);
-        if (isset($result[1])) return $result[1];
-        else Log::warning("ADB::getCurrentActivity: explode error, currentPackageAndActivity: $currentPackageAndActivity");
+        if (isset($result[1])) {
+            return $result[1];
+        } else {
+            Log::error("ADB::getCurrentActivity: explode error, currentPackageAndActivity: $currentPackageAndActivity");
+        }
+
         return '';
     }
 
@@ -411,7 +424,9 @@ class ADB
         if ($quality !== null or $scale !== null) {
             list($width, $height, $type, $attr) = getimagesize($tmpPath);
             $imageHandle = imagecreatefrompng($tmpPath);
-            if ($scale !== null) $imageHandle = imagescale($imageHandle, $width * $scale);
+            if ($scale !== null) {
+                $imageHandle = imagescale($imageHandle, $width * $scale);
+            }
             imagepng($imageHandle, $tmpPath, $quality);
         }
         $result = null;
@@ -440,8 +455,12 @@ class ADB
      */
     public function screenshotAndSaveTo(string $directory = null, string $fileName = null, string $fileNamePrefix = null): string
     {
-        if ($directory === null) $directory = '.';
-        if ($fileName === null) $fileName = ($fileNamePrefix ? $fileNamePrefix . '-' : '') . date('YmdHis');
+        if ($directory === null) {
+            $directory = '.';
+        }
+        if ($fileName === null) {
+            $fileName = ($fileNamePrefix ? $fileNamePrefix . '-' : '') . date('YmdHis');
+        }
         $path = "$directory/$fileName.png";
         file_put_contents($path, $this->getCurrentScreenshot());
         return $path;
@@ -475,9 +494,13 @@ class ADB
             preg_match('/ {2}(.+): (.+)/', $result[$i], $match);
             if (count($match) === 3) {
                 $value = $match[2];
-                if ($match[2] === 'true') $value = true;
-                else if ($match[2] === 'false') $value = false;
-                else if (is_numeric($match[2])) $value = intval($match[2]);
+                if ($match[2] === 'true') {
+                    $value = true;
+                } else if ($match[2] === 'false') {
+                    $value = false;
+                } else if (is_numeric($match[2])) {
+                    $value = intval($match[2]);
+                }
                 $entries[$match[1]] = $value;
             }
         }
@@ -561,7 +584,9 @@ class ADB
         if ($name) $args .= $name;
         $delimiter = self::$hostOS === 'windows' ? "\r\r\n" : "\r\n";
         $packages = explode($delimiter, $this->shell("pm list packages $args"));
-        foreach ($packages as &$package) $package = substr($package, 8);
+        foreach ($packages as &$package) {
+            $package = substr($package, 8);
+        }
         return $packages;
     }
 
@@ -596,7 +621,9 @@ class ADB
             preg_match('/(.+): (.+)/', $result[$i], $match);
             if (count($match) === 3) {
                 $value = $match[2];
-                if (is_numeric($match[2])) $value = intval($match[2]);
+                if (is_numeric($match[2])) {
+                    $value = intval($match[2]);
+                }
                 $entries[$match[1]] = $value;
             }
         }
@@ -806,7 +833,7 @@ class ADB
 
     /**
      * dump current UI hierarchy xml file into a DOMXPath
-     * class for query, ext-dom required
+     * class for query
      *
      * @param string|null $path local xml file path
      * @return DOMXPath
@@ -818,12 +845,16 @@ class ADB
         if (empty($path)) {
             $parentDirectory = defined('APP_PATH') ? APP_PATH : '.';
             $localPath = $parentDirectory . DIRECTORY_SEPARATOR . uniqid('UIHierarchy_', true) . '.xml';
-        } else $localPath = $path;
+        } else {
+            $localPath = $path;
+        }
 
         $sleepCount = 6;
         // wait for the UI to be idle to be dumped
         while ($sleepCount--) {
-            if (trim($this->shell("uiautomator dump $flag /data/local/tmp/uidump.xml")) == 'UI hierchary dumped to: /data/local/tmp/uidump.xml') break;
+            if (trim($this->shell("uiautomator dump $flag /data/local/tmp/uidump.xml")) == 'UI hierchary dumped to: /data/local/tmp/uidump.xml') {
+                break;
+            }
             usleep(500000);
         }
 
@@ -831,7 +862,10 @@ class ADB
         // parse
         $UIHierarchy = new DOMDocument();
         $UIHierarchy->load($localPath);
-        if (empty($path)) unlink($localPath);
+        if (empty($path)) {
+            unlink($localPath);
+        }
+
         $this->shell('rm /data/local/tmp/uidump.xml');
         return new DOMXPath($UIHierarchy);
     }
@@ -848,8 +882,14 @@ class ADB
      */
     public function waitUntil(callable $waitingFor, array $params = null, int $timeout = null, int $sleepInterval = null, callable $timeoutCallback = null)
     {
-        if ($sleepInterval === null) $sleepInterval = $this->waitUntilSleepInterval;
-        if ($timeout === null) $timeout = $this->waitUntilTimeout;
+        if (is_null($sleepInterval)) {
+            $sleepInterval = $this->waitUntilSleepInterval;
+        }
+
+        if (is_null($timeout)) {
+            $timeout = $this->waitUntilTimeout;
+        }
+
         $result = null;
         $elapsedTime = 0;
         while (true) {
@@ -858,8 +898,11 @@ class ADB
             usleep($sleepInterval);
             $elapsedTime += $sleepInterval;
             if ($elapsedTime > $timeout) {
-                if ($timeoutCallback) call_user_func_array($waitingFor, []);
-                else throw new RuntimeException("Time out after $timeout microseconds");
+                if ($timeoutCallback) {
+                    call_user_func_array($waitingFor, []);
+                } else {
+                    throw new RuntimeException("Time out after $timeout microseconds");
+                }
             }
         }
         return $result;

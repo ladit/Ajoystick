@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Ajoystick;
 
 /**
@@ -72,9 +71,17 @@ trait Genyshell
      */
     public function setGPS(float $longitude = null, float $latitude = null)
     {
-        if (!$this->getGPSStatus()) $this->enableGPS();
-        if ($longitude) $this->genyShell("gps setlongitude $longitude");
-        if ($latitude) $this->genyShell("gps setlatitude $latitude");
+        if (!$this->getGPSStatus()) {
+            $this->enableGPS();
+        }
+
+        if ($longitude) {
+            $this->genyShell("gps setlongitude $longitude");
+        }
+
+        if ($latitude) {
+            $this->genyShell("gps setlatitude $latitude");
+        }
     }
 
     /**

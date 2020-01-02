@@ -1,5 +1,5 @@
 {
-  "name": "Ajoystick",
+  "name": "ladit/ajoystick",
   "description": "Simple Android joystick base on adb.",
   "type": "library",
   "keywords": [
@@ -27,7 +27,9 @@
   },
   "autoload": {
     "psr-4": {
-      "Ajoystick\\": ["src"]
+      "Ajoystick\\": [
+        "src"
+      ]
     }
   }
 }

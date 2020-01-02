@@ -1,8 +1,6 @@
 <?php
 
-
 namespace Ajoystick;
-
 
 use DOMXPath;
 
@@ -47,7 +45,9 @@ class Device extends ADB
     public function __construct(string $deviceId = null)
     {
         parent::__construct();
-        if ($deviceId) $this->setTargetDevice($deviceId);
+        if ($deviceId) {
+            $this->setTargetDevice($deviceId);
+        }
         $this->deviceId = parent::getDeviceID();
         $this->deviceModel = parent::getDeviceModel();
         $this->androidVersion = parent::getAndroidVersion();
@@ -97,10 +97,15 @@ class Device extends ADB
      */
     public function findElementBy(string $type, string $value)
     {
-        if ($this->dump) $this->xpath = $this->UIDump();
+        if ($this->dump) {
+            $this->xpath = $this->UIDump();
+        }
+
         $query = $type === 'xpath' ? $value : "(//node[@$type='$value'])[1]";
         $nodeList = $this->xpath->query($query);
-        if ($nodeList->length === 0) return null;
+        if ($nodeList->length === 0) {
+            return null;
+        }
         $node = $nodeList->item(0);
         return new Element($node, $this);
     }
@@ -114,7 +119,10 @@ class Device extends ADB
      */
     public function findElementsBy(string $type, string $value): ElementList
     {
-        if ($this->dump) $this->xpath = $this->UIDump();
+        if ($this->dump) {
+            $this->xpath = $this->UIDump();
+        }
+
         $query = $type === 'xpath' ? $value : "//node[@$type='$value']";
         $nodeList = $this->xpath->evaluate($query);
         return new ElementList($nodeList, $this);

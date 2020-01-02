@@ -1,8 +1,6 @@
 <?php
 
-
 namespace Ajoystick;
-
 
 use ArrayIterator;
 use DOMNode;
@@ -26,7 +24,11 @@ class ElementList extends DOMNodeList implements IteratorAggregate
      */
     public function __construct(DOMNodeList &$nodes, Device &$device)
     {
-        if ($nodes) foreach ($nodes as $node) $this->elements[] = new Element($node, $device);
+        if ($nodes) {
+            foreach ($nodes as $node) {
+                $this->elements[] = new Element($node, $device);
+            }
+        }
     }
 
     /**
