@@ -421,10 +421,10 @@ class ADB
      */
     public function getCurrentScreenshot(string $to = 'handle', int $quality = null, float $scale = null)
     {
-        $this->adb('exec-out screencap -p > /data/local/tmp/screenshot.png');
-        $tmpPath = tempnam(sys_get_temp_dir(), 'adScreenshot');
-        $this->adb("pull /data/local/tmp/screenshot.png $tmpPath");
-        $this->shell('rm /data/local/tmp/screenshot.png');
+        $this->shell('screencap -p /tmp/screenshot.png');
+        $tmpPath = tempnam(sys_get_temp_dir(), 'adScreenshot') . '.png';
+        $this->adb("pull /tmp/screenshot.png $tmpPath");
+        $this->shell('rm /tmp/screenshot.png');
 
         if ($quality !== null or $scale !== null) {
             list($width, $height, $type, $attr) = getimagesize($tmpPath);
