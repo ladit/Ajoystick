@@ -199,6 +199,10 @@ class ADB
         $command = self::getAdbExecutive() . ' ' . $this->adbDeviceParam . ' ' . $args;
         Log::debug("ADB:adb: $command");
         $handle = popen($command, 'rb');
+        if ($handle === false) {
+            Log::error("executing command \{$command} failed");
+            return "";
+        }
         if ($noBlocking === false) {
             stream_set_blocking($handle, 1);
         }
@@ -417,9 +421,10 @@ class ADB
      */
     public function getCurrentScreenshot(string $to = 'handle', int $quality = null, float $scale = null)
     {
-        $screenshotString = $this->adb('exec-out screencap -p');
+        $this->adb('exec-out screencap -p > /data/local/tmp/screenshot.png');
         $tmpPath = tempnam(sys_get_temp_dir(), 'adScreenshot');
-        file_put_contents($tmpPath, $screenshotString);
+        $this->adb("pull /data/local/tmp/screenshot.png $tmpPath");
+        $this->shell('rm /data/local/tmp/screenshot.png');
 
         if ($quality !== null or $scale !== null) {
             list($width, $height, $type, $attr) = getimagesize($tmpPath);
@@ -731,7 +736,7 @@ class ADB
         if (self::$adbKeyboardIsDefaultIME === true) {
             // use ADBKeyboard
             $text = preg_replace('/["]/', '\\"', $text);
-            $this->shell("am broadcast -a ADB_INPUT_B64 --es msg `echo \"$text\" | base64`");
+            $this->shell('am broadcast -a ADB_INPUT_B64 --es msg ' . base64_encode($text));
         } else {
             // use adb shell input text "text"
             $text = preg_replace('/["$]/', '\\\\\\\\\\\\$0', $text);
