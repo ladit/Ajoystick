@@ -881,7 +881,7 @@ class ADB
      * @param array|null $params
      * @param int|null $timeout
      * @param int|null $sleepInterval
-     * @param callable|null $timeoutCallback timeout callback, if not provided, raise a RuntimeException
+     * @param callable|null $timeoutCallback timeout callback, if not provided, raise a RuntimeException when time out
      * @return mixed
      * @throws RuntimeException
      */
@@ -904,7 +904,7 @@ class ADB
             $elapsedTime += $sleepInterval;
             if ($elapsedTime > $timeout) {
                 if ($timeoutCallback) {
-                    call_user_func_array($waitingFor, []);
+                    call_user_func_array($timeoutCallback, []);
                 } else {
                     throw new RuntimeException("Time out after $timeout microseconds");
                 }
